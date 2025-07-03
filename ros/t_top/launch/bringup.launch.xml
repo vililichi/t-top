@@ -9,6 +9,7 @@
     <arg name="whisper_model" default="base"/> <!-- Options: tiny, base, small, medium -->
 
     <arg name="camera_2d_wide_enabled" default="false"/>
+    <arg name="camera_3d_enabled" default="true"/>
     <arg name="neural_network_inference_type" default="trt_gpu"/>
 
     <arg name="video_analyzer_3d_use_descriptor_yolo" default="false"/>
@@ -45,12 +46,14 @@
     <!-- 30 seconds needed to launch platform.launch -->
     <include file="$(find-pkg-share t_top)/launch/platform.launch.xml">
         <arg name="camera_2d_wide_enabled" value="$(var camera_2d_wide_enabled)"/>
+        <arg name="camera_3d_enabled" value="$(var camera_3d_enabled)"/>
         <arg name="use_echo_cancellation" value="$(var use_echo_cancellation)"/>
     </include>
 
     <include file="$(find-pkg-share t_top)/launch/perceptions.launch.xml">
         <arg name="language" value="$(var language)"/>
         <arg name="camera_2d_wide_enabled" value="$(var camera_2d_wide_enabled)"/>
+        <arg name="camera_3d_enabled" value="$(var camera_3d_enabled)"/>
         <arg name="neural_network_inference_type" value="$(var neural_network_inference_type)"/>
 
         <arg name="video_analyzer_3d_use_descriptor_yolo" value="$(var video_analyzer_3d_use_descriptor_yolo)"/>
@@ -124,5 +127,6 @@
 
     <include if="$(var record_session)" file="$(find-pkg-share t_top)/launch/recording.launch.xml">
         <arg name="camera_2d_wide_enabled" value="$(var camera_2d_wide_enabled)"/>
+        <arg name="camera_3d_enabled" value="$(var camera_3d_enabled)"/>
     </include>
 </launch>
