@@ -1,5 +1,6 @@
 <launch>
     <arg name="camera_2d_wide_enabled" default="false"/>
+    <arg name="camera_3d_enabled" default="true"/>
     <arg name="use_echo_cancellation" default="false"/>
     <arg name="pulse_audio_source"/>
     <arg name="pulse_audio_sink"/>
@@ -9,7 +10,7 @@
     <let unless="$(var use_echo_cancellation)" name="audio_capture_device" value="$(var pulse_audio_source)"/>
 
     <!-- Camera 3d -->
-    <include file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
+    <include if="$(var camera_3d_enabled)" file="$(find-pkg-share realsense2_camera)/launch/rs_launch.py">
         <arg name="depth_module.depth_profile" value="1280,720,15" />
         <arg name="rgb_camera.color_profile" value="1280,720,15" />
         <arg name="enable_depth" value="true" />

@@ -1,15 +1,17 @@
 <launch>
+    <arg name="camera_3d_enabled" default="true"/>
+
     <!--Static tf broadcast launch-->
     <node pkg="tf2_ros" exec="static_transform_publisher" name="stewart_base_tf_publisher" args="--z 0.04875 --frame-id torso_base --child-frame-id stewart_base"/>
 
     <node pkg="tf2_ros" exec="static_transform_publisher" name="dynamixel_control_tf_publisher" args="--x -0.026336 --y 0.081616 --z -0.03325 --frame-id stewart_base --child-frame-id dynamixel_control"/>
     <node pkg="tf2_ros" exec="static_transform_publisher" name="dynamixel_control_imu_tf_publisher" args="--yaw 0.6124 --pitch 0.3535 --roll 0.3535 --frame-id dynamixel_control --child-frame-id dynamixel_control_imu"/>
 
-    <node pkg="tf2_ros" exec="static_transform_publisher" name="camera_3d_link_tf_publisher" args="--x 0.0645 --z 0.17189 --frame-id head --child-frame-id camera_3d_link"/>
-    <node pkg="tf2_ros" exec="static_transform_publisher" name="camera_3d_depth_tf_publisher" args="--x 0.01995 --frame-id camera_3d_link --child-frame-id camera_3d_depth_frame"/>
-    <node pkg="tf2_ros" exec="static_transform_publisher" name="camera_3d_depth_optical_tf_publisher" args="--yaw 1.570796 --pitch 3.141593 --roll 1.570796 --frame-id camera_3d_depth_frame --child-frame-id camera_3d_depth_optical_frame"/>
-    <node pkg="tf2_ros" exec="static_transform_publisher" name="camera_3d_color_tf_publisher" args="--frame-id camera_3d_depth_frame --child-frame-id camera_3d_color_frame"/>
-    <node pkg="tf2_ros" exec="static_transform_publisher" name="camera_3d_color_optical_tf_publisher" args="--yaw 1.570796 --pitch 3.141593 --roll 1.570796 --frame-id camera_3d_color_frame --child-frame-id camera_3d_color_optical_frame"/>
+    <node if="$(var camera_3d_enabled)" pkg="tf2_ros" exec="static_transform_publisher" name="camera_3d_link_tf_publisher" args="--x 0.0645 --z 0.17189 --frame-id head --child-frame-id camera_3d_link"/>
+    <node if="$(var camera_3d_enabled)" pkg="tf2_ros" exec="static_transform_publisher" name="camera_3d_depth_tf_publisher" args="--x 0.01995 --frame-id camera_3d_link --child-frame-id camera_3d_depth_frame"/>
+    <node if="$(var camera_3d_enabled)" pkg="tf2_ros" exec="static_transform_publisher" name="camera_3d_depth_optical_tf_publisher" args="--yaw 1.570796 --pitch 3.141593 --roll 1.570796 --frame-id camera_3d_depth_frame --child-frame-id camera_3d_depth_optical_frame"/>
+    <node if="$(var camera_3d_enabled)" pkg="tf2_ros" exec="static_transform_publisher" name="camera_3d_color_tf_publisher" args="--frame-id camera_3d_depth_frame --child-frame-id camera_3d_color_frame"/>
+    <node if="$(var camera_3d_enabled)" pkg="tf2_ros" exec="static_transform_publisher" name="camera_3d_color_optical_tf_publisher" args="--yaw 1.570796 --pitch 3.141593 --roll 1.570796 --frame-id camera_3d_color_frame --child-frame-id camera_3d_color_optical_frame"/>
 
     <node pkg="tf2_ros" exec="static_transform_publisher" name="camera_2d_wide_link_tf_publisher" args="--x 0.06675 --z 0.13968 --frame-id head --child-frame-id camera_2d_wide_link"/>
     <node pkg="tf2_ros" exec="static_transform_publisher" name="camera_2d_wide_frame_tf_publisher" args="--x 0.0015 --frame-id camera_2d_wide_link --child-frame-id camera_2d_wide_frame"/>
