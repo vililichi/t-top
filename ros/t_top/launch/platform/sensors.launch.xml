@@ -35,6 +35,7 @@
         <param name="property_0_value" value="1.0"/>
 
         <remap from="image_raw" to="camera_2d_wide_full_hd/image"/>
+        <remap from="image_raw/compressed" to="camera_2d_wide_full_hd/image/compressed"/>
         <remap from="camera_info" to="camera_2d_wide_full_hd/camera_info"/>
         <remap from="set_camera_info" to="camera_2d_wide_full_hd/set_camera_info"/>
     </node>
