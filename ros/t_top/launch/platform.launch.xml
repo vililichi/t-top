@@ -1,5 +1,6 @@
 <launch>
     <arg name="camera_2d_wide_enabled"/>
+    <arg name="camera_2d_wide_process_enabled" default="true"/>
     <arg name="camera_3d_enabled" default='true'/>
     <arg name="use_echo_cancellation" default="false"/>
     <arg name="opentera_playback_node_enabled" default="false"/>
@@ -17,6 +18,7 @@
 
     <include file="$(find-pkg-share t_top)/launch/platform/sensors.launch.xml">
         <arg name="camera_2d_wide_enabled" value="$(var camera_2d_wide_enabled)"/>
+        <arg name="camera_2d_wide_process_enabled" value="$(var camera_2d_wide_process_enabled)"/>
         <arg name="camera_3d_enabled" value="$(var camera_3d_enabled)"/>
         <arg name="use_echo_cancellation" value="$(var use_echo_cancellation)"/>
         <arg name="pulse_audio_source" value="alsa_input.usb-IntRoLab_16SoundsUSB_Audio_2.0-00.multichannel-input" />
