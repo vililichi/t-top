@@ -1,0 +1,61 @@
+<launch>
+    <arg name="language" default="fr"/>  <!-- Options: fr or en -->
+    <arg name="camera_2d_wide_enabled" default="true"/>
+    <arg name="camera_3d_enabled" default="false"/>
+
+    <!-- Platform -->
+    <include file="$(find-pkg-share t_top)/launch/platform.launch.xml">
+        <arg name="camera_2d_wide_enabled" value="true"/>
+        <arg name="camera_2d_wide_process_enabled" value="false"/>
+        <arg name="camera_3d_enabled" value="false"/>
+        <arg name="use_echo_cancellation" value="false"/>
+    </include>
+
+     <!-- Ego Noise Reduction -->
+    <include file="$(find-pkg-share t_top)/launch/perceptions/ego_noise_reduction.launch.xml">
+        <arg name="ego_noise_reduction_perception_delay" value="0"/>
+    </include>
+
+    <!-- ODAS -->
+    <include file="$(find-pkg-share t_top)/launch/perceptions/odas.launch.xml">
+        <arg name="visualization" value="false"/>
+        <arg name="use_echo_cancellation" value="0"/>
+        <arg name="odas_perception_delay" value="0"/>
+    </include>
+
+    <!-- VAD -->
+    <include file="$(find-pkg-share t_top)/launch/perceptions/vad.launch.xml">
+        <arg name="vad_perception_delay" value="0"/>
+    </include>
+
+    <!-- Speech to Text -->
+    <include file="$(find-pkg-share t_top)/launch/perceptions/speech_to_text.launch.xml">
+        <arg name="language" value="fr"/>
+        <arg name="type" value="whisper"/>
+        <arg name="whisper_model" value="small"/>
+        <arg name="speech_to_text_perception_delay" value="0.0"/>
+    </include>
+
+    <!-- Led Animation -->
+    <include file="$(find-pkg-share t_top)/launch/behaviors/led_animations.launch.xml">
+        <arg name="led_animations_behavior_delay" value="0"/>
+    </include>
+
+    <!-- Talk -->
+    <include file="$(find-pkg-share t_top)/launch/behaviors/talk.launch.xml">
+        <arg name="language" value="fr"/>
+        <arg name="gender" value="male"/>
+        <arg name="voice_generator_type" value="piper"/>
+        <arg name="speaking_rate" value="1.0"/>
+        <arg name="talk_behavior_delay" value="0.0"/>
+    </include>
+
+    <!-- Proxy Component -->
+    <node pkg="remote_proxy_components" exec="full_screen_display_node.py" name="full_screen_display_node"></node>
+    <node pkg="remote_proxy_components" exec="tts_proxy_node.py" name="tts_proxy_node"></node>
+    <node pkg="remote_proxy_components" exec="stt_proxy_node.py" name="stt_proxy_node"></node>
+
+    <!-- Motivation / HBBA -->
+    <node pkg="remote_proxy" exec="remote_proxy_node" name="remote_proxy_node" output="screen"></node>
+
+</launch>
