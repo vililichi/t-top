@@ -47,7 +47,7 @@ int startNode()
 
     vector<unique_ptr<BaseStrategy>> strategies;
 
-    strategies.emplace_back(createChatStrategy(filterPool, desireSet, node));
+    strategies.emplace_back(createManualChatStrategy(filterPool, desireSet, node));
     //strategies.emplace_back(createNearestFaceFollowingStrategy(filterPool));
     //strategies.emplace_back(createTooCloseReactionStrategy(filterPool));
 
@@ -55,7 +55,7 @@ int startNode()
     auto strategyStateLogger = make_unique<RosTopicStrategyStateLogger>(node);
     HbbaLite hbba(desireSet, move(strategies), {{"sound", 1}}, move(solver), move(strategyStateLogger));
 
-    desireSet->addDesire(make_unique<ChatDesire>());
+    desireSet->addDesire(make_unique<ManualChatDesire>());
     //desireSet->addDesire(make_unique<NearestFaceFollowingDesire>());
     //desireSet->addDesire(make_unique<TooCloseReactionDesire>());
 

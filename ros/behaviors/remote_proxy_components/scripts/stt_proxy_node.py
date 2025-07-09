@@ -3,7 +3,7 @@
 import hbba_lite
 
 from perception_msgs.msg import Transcript
-from std_msgs.msg import String
+from std_msgs.msg import String, Bool
 
 from rclpy.node import Node
 from rclpy.qos import QoSProfile
@@ -17,31 +17,27 @@ class STTPoxyNode(Node):
         self._talking = True
 
         # Subscriber
-        self._transcript_sub = hbba_lite.OnOffHbbaSubscriber(
-            self,
+        self._transcript_sub = self.create_subscription(
             Transcript,
-            "chat/transcript",
+            "listen/transcript",
             self._on_transcript_received_cb,
-            qos_profile=QoSProfile(history=1, depth=1),
-            state_service_name="chat/transcript/filter_state",
+            qos_profile=QoSProfile(history=1, depth=1)
         )
 
-        self._transcript_sub.on_filter_state_changed(
-            self._on_transcript_filter_state_cb
+        self._is_listening_sub = self.create_subscription(
+            Bool,
+            "listen/activated",
+            self._is_listening_cb,
+            1
         )
 
         # publisher
         self._text_pub = self.create_publisher(String, "ttop_remote_proxy/stt", 1)
-        
-    def _on_transcript_filter_state_cb(
-        self, previous_is_filtering_all_messages, new_is_filtering_all_messages
-    ):
-        self.get_logger().info(
-            f"Transcript filter state changed: {new_is_filtering_all_messages} from {previous_is_filtering_all_messages}"
-        )
+
+        self._is_listening_pub = self.create_publisher(Bool, "ttop_remote_proxy/is_listening", 1)
 
     def _on_transcript_received_cb(self, msg: Transcript):
-        self.get_logger().info(f"[SpeakListen] Transcript received: {msg.text}")
+        self.get_logger().info(f"Transcript received: {msg.text}")
 
         self._talking = False
 
@@ -49,6 +45,10 @@ class STTPoxyNode(Node):
             out_msg = String()
             out_msg.data = msg.text
             self._text_pub.publish(out_msg)
+
+    def _is_listening_cb(self, msg: Bool):
+        self.get_logger().info(f"Is listening: {msg.data}")
+        self._is_listening_pub.publish(msg)
 
 def main(args=None):
     rclpy.init()

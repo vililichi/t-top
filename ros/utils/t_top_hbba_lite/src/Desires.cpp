@@ -82,3 +82,5 @@ TeleoperationDesire::TeleoperationDesire(uint16_t intensity) : Desire(intensity)
 TooCloseReactionDesire::TooCloseReactionDesire(uint16_t intensity) : Desire(intensity) {}
 
 ChatDesire::ChatDesire(uint16_t intensity) : Desire(intensity) {}
+
+ManualChatDesire::ManualChatDesire(uint16_t intensity) : Desire(intensity) {}

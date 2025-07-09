@@ -34,10 +34,18 @@ class TTSPoxyNode(Node):
             1,
             callback_group=self._subscriber_callback_group,
         )
+        self._talk_input_sub = self.create_subscription(
+            Bool,
+            "ttop_remote_proxy/start_tts",
+            self._on_start_tts_cb,
+            1,
+            callback_group=self._subscriber_callback_group,
+        )
 
         # publisher
-        self._talk_text_pub = self.create_publisher(Text, "talk/text", 1)
+        self._talk_text_pub = self.create_publisher(Text, "speak/text", 1)
         self._is_talking_pub = self.create_publisher(Bool, "ttop_remote_proxy/is_talking", 1)
+        self._start_listen_pub = self.create_publisher(Done, "listen/start", 1)
         
     def _on_talk_done_cb(self, msg: Done):
         self.get_logger().info(f"Talk done : {msg.ok}")
@@ -57,6 +65,12 @@ class TTSPoxyNode(Node):
         talk_msg.text = msg.data
         self.get_logger().info(f"Sending talk message: {talk_msg.text}")
         self._talk_text_pub.publish(talk_msg)
+
+    def _on_start_tts_cb(self, msg: Bool):
+        start_listen_msg = Done()
+        start_listen_msg.ok = msg.data
+        self.get_logger().info(f"Starting to listen: {msg.data}")
+        self._start_listen_pub.publish(start_listen_msg)
 
 def main(args=None):
     rclpy.init()

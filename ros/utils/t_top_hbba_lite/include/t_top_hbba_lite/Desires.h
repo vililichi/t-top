@@ -399,4 +399,13 @@ public:
     DECLARE_DESIRE_METHODS(ChatDesire);
 };
 
+class ManualChatDesire : public Desire
+{
+public:
+    explicit ManualChatDesire(uint16_t intensity = 1);
+    ~ManualChatDesire() override = default;
+
+    DECLARE_DESIRE_METHODS(ManualChatDesire);
+};
+
 #endif

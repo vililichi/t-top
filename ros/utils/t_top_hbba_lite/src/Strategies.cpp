@@ -442,6 +442,172 @@ void ChatStrategy::sendGesture(const string& gesture)
     m_gesturePublisher->publish(msg);
 }
 
+ManualChatStrategy::ManualChatStrategy(
+    uint16_t utility,
+    shared_ptr<FilterPool> filterPool,
+    shared_ptr<DesireSet> desireSet,
+    shared_ptr<rclcpp::Node> node)
+    : Strategy<ManualChatDesire>(
+          utility,
+          {{"sound", 1}},
+          {{"talk/filter_state", FilterConfiguration::onOff(FilterConfiguration::DefaultState::DISABLED)},
+           {"speech_to_text/filter_state", FilterConfiguration::onOff(FilterConfiguration::DefaultState::DISABLED)},
+           {"vad/filter_state", FilterConfiguration::onOff(FilterConfiguration::DefaultState::DISABLED)},
+           {"led_animations/filter_state", FilterConfiguration::onOff(FilterConfiguration::DefaultState::DISABLED)}},
+          std::move(filterPool)),
+      m_desireSet(std::move(desireSet)),
+      m_node(std::move(node)),
+      m_need_listen(false),
+      m_is_speaking(false)
+{
+
+    // SPEAK
+    m_talkDoneSubscriber = m_node->create_subscription<behavior_msgs::msg::Done>(
+        "talk/done",
+        1,
+        [this](const behavior_msgs::msg::Done::SharedPtr msg) { talkDoneSubscriberCallback(msg); }
+    );
+    m_talkDonePublisher = m_node->create_publisher<behavior_msgs::msg::Done>("speak/done", rclcpp::QoS(1).transient_local());
+
+    m_tts_text_input_Subscriber = m_node->create_subscription<behavior_msgs::msg::Text>(
+        "speak/text",
+        1,
+        [this](const behavior_msgs::msg::Text::SharedPtr msg) { textSubscriberCallback(msg); }
+    );
+    m_tts_text_output_Publisher = m_node->create_publisher<behavior_msgs::msg::Text>("talk/text", rclcpp::QoS(1).transient_local());
+
+    // LISTEN
+    m_start_listen_Subscriber = m_node->create_subscription<behavior_msgs::msg::Done>(
+        "listen/start",
+        1,
+        [this](const behavior_msgs::msg::Done::SharedPtr msg) { startListenSubscriberCallback(msg); }
+    );
+    m_stt_transcript_input_Subscriber = m_node->create_subscription<perception_msgs::msg::Transcript>(
+        "speech_to_text/transcript",
+        1,
+        [this](const perception_msgs::msg::Transcript::SharedPtr msg) { transcriptSubscriberCallback(msg); }
+    );
+    m_stt_transcript_output_Publisher = m_node->create_publisher<perception_msgs::msg::Transcript>("listen/transcript", rclcpp::QoS(1).transient_local());
+    m_is_listening_Publisher = m_node->create_publisher<std_msgs::msg::Bool>("listen/activated", rclcpp::QoS(1).transient_local());
+    
+    // LEDS
+    m_ledAnimationPublisher = m_node->create_publisher<behavior_msgs::msg::LedAnimation>(
+        "led_animations/animation",
+        rclcpp::QoS(1).transient_local()
+    );
+}
+
+StrategyType ManualChatStrategy::strategyType()
+{
+    return StrategyType::get<ManualChatStrategy>();
+}
+
+void ManualChatStrategy::onEnabling(const ManualChatDesire& desire)
+{
+    // Unused parameter for now
+    (void)desire;
+
+    evaluateListenNeed();
+}
+
+void ManualChatStrategy::textSubscriberCallback(const behavior_msgs::msg::Text::SharedPtr msg)
+{
+    m_is_speaking  = true;
+    evaluateListenNeed();
+    m_tts_text_output_Publisher->publish(*msg);
+}
+
+void ManualChatStrategy::transcriptSubscriberCallback(const perception_msgs::msg::Transcript::SharedPtr msg)
+{
+    if (msg->is_final)
+    {
+        m_need_listen = false;
+        evaluateListenNeed();
+        m_stt_transcript_output_Publisher->publish(*msg);
+    }
+}
+
+void ManualChatStrategy::talkDoneSubscriberCallback(const behavior_msgs::msg::Done::SharedPtr msg)
+{
+    if (msg->ok)
+    {
+        m_is_speaking  = false;
+        evaluateListenNeed();
+        m_talkDonePublisher->publish(*msg);
+    }
+}
+
+void ManualChatStrategy::startListenSubscriberCallback(const behavior_msgs::msg::Done::SharedPtr msg)
+{
+    if (msg->ok)
+    {
+        m_need_listen = true;
+        evaluateListenNeed();
+    }
+}
+
+void ManualChatStrategy::evaluateListenNeed()
+{
+    if( m_need_listen && !m_is_speaking )
+    {
+        activateListen();
+    }
+    else
+    {
+        deactivateListen();
+    }
+}
+
+void ManualChatStrategy::activateListen()
+{
+    enableFilter("vad/filter_state");
+    enableFilter("speech_to_text/filter_state");
+
+    disableFilter("talk/filter_state");
+    sendListeningLedAnimation();
+
+    std_msgs::msg::Bool msg;
+    msg.data = true;
+    m_is_listening_Publisher->publish(msg);
+}
+
+void ManualChatStrategy::deactivateListen()
+{
+    disableFilter("vad/filter_state");
+    disableFilter("speech_to_text/filter_state");
+    
+    enableFilter("talk/filter_state");
+    sendTalkingLedAnimation();
+
+    std_msgs::msg::Bool msg;
+    msg.data = false;
+    m_is_listening_Publisher->publish(msg);
+}
+
+void ManualChatStrategy::sendListeningLedAnimation()
+{
+    enableFilter("led_animations/filter_state");
+    behavior_msgs::msg::LedAnimation msg;
+    msg.id = desireId().value();
+    msg.duration_s = std::numeric_limits<double>::infinity();
+    msg.name = "rotating_sin";
+    msg.speed = 1.0;
+    msg.colors = vector<daemon_ros_client::msg::LedColor>{ManualChatStrategy::getColor(0, 255, 0)};
+    m_ledAnimationPublisher->publish(msg);
+}
+
+void ManualChatStrategy::sendTalkingLedAnimation()
+{
+    enableFilter("led_animations/filter_state");
+    behavior_msgs::msg::LedAnimation msg;
+    msg.id = desireId().value();
+    msg.duration_s = std::numeric_limits<double>::infinity();
+    msg.name = "rotating_sin";
+    msg.speed = 1.0;
+    msg.colors = vector<daemon_ros_client::msg::LedColor>{ManualChatStrategy::getColor(255, 0, 0)};
+    m_ledAnimationPublisher->publish(msg);
+}
+
 unique_ptr<BaseStrategy> createCamera3dRecordingStrategy(shared_ptr<FilterPool> filterPool, uint16_t utility)
 {
     return make_unique<Strategy<Camera3dRecordingDesire>>(
@@ -731,4 +897,13 @@ unique_ptr<BaseStrategy> createChatStrategy(
     uint16_t utility)
 {
     return make_unique<ChatStrategy>(utility, std::move(filterPool), std::move(desireSet), std::move(node));
+}
+
+unique_ptr<BaseStrategy> createManualChatStrategy(
+    shared_ptr<FilterPool> filterPool,
+    shared_ptr<DesireSet> desireSet,
+    shared_ptr<rclcpp::Node> node,
+    uint16_t utility)
+{
+    return make_unique<ManualChatStrategy>(utility, std::move(filterPool), std::move(desireSet), std::move(node));
 }
