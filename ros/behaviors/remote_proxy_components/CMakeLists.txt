@@ -29,6 +29,7 @@ ament_python_install_package(${PROJECT_NAME})
 # Python Nodes
 install(PROGRAMS
   scripts/full_screen_display_node.py
+  scripts/gesture_proxy_node.py
   scripts/tts_proxy_node.py
   scripts/stt_proxy_node.py
   DESTINATION lib/${PROJECT_NAME}

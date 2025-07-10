@@ -50,10 +50,17 @@
         <arg name="talk_behavior_delay" value="0.0"/>
     </include>
 
+    <!-- Gesture -->
+    <include file="$(find-pkg-share t_top)/launch/behaviors/gesture.launch.xml">
+        <arg name="simulation" value="false"/>
+        <arg name="gesture_behavior_delay" value="0.0"/>
+    </include>
+
     <!-- Proxy Component -->
     <node pkg="remote_proxy_components" exec="full_screen_display_node.py" name="full_screen_display_node"></node>
     <node pkg="remote_proxy_components" exec="tts_proxy_node.py" name="tts_proxy_node"></node>
     <node pkg="remote_proxy_components" exec="stt_proxy_node.py" name="stt_proxy_node"></node>
+    <node pkg="remote_proxy_components" exec="gesture_proxy_node.py" name="gesture_proxy_node"></node>
 
     <!-- Motivation / HBBA -->
     <node pkg="remote_proxy" exec="remote_proxy_node" name="remote_proxy_node" output="screen"></node>

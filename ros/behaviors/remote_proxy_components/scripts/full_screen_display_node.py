@@ -2,7 +2,7 @@
 
 from PyQt5 import QtWidgets
 from PyQt5.QtGui import QPixmap, QImage
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QObject, pyqtSignal
 import cv2
 import numpy as np
 
@@ -14,9 +14,15 @@ from threading import Thread, Lock
 import time
 import sys
 
+class QPixmapSignalEmitter(QObject):
+    # Define a custom signal with a value
+    signal = pyqtSignal(QPixmap)
+
 class ScaledImage(QtWidgets.QWidget):
     def __init__(self):
         super().__init__()
+
+        self._signal_emiter = QPixmapSignalEmitter()
 
         self._cv_image = None
         self._qpixmap = None
@@ -26,6 +32,8 @@ class ScaledImage(QtWidgets.QWidget):
         self._layout.setAlignment(Qt.AlignCenter)
         self._layout.addWidget(self._image_label)
         self.setLayout(self._layout)
+
+        self._signal_emiter.signal.connect(self._image_label.setPixmap)
 
         self._img_size = 0.85
 
@@ -41,7 +49,7 @@ class ScaledImage(QtWidgets.QWidget):
     def _setImageWithSize(self, cv_image:np.ndarray, size:float=0.75):
         self._cv_image = cv_image
         self._qpixmap = self._convert_cv_qt(cv_image, size)
-        self._image_label.setPixmap(self._qpixmap)
+        self._signal_emiter.signal.emit(self._qpixmap)
 
     def setImage(self, cv_image:np.ndarray):
         self._setImageWithSize(cv_image, self._img_size)

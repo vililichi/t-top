@@ -16,6 +16,8 @@ MOVE_HEAD_TO_ORIGIN_TIMEOUT = 5
 MOVE_TORSO_TO_ORIGIN_TIMEOUT = 30
 MOVE_THINKING_TIMEOUT = 5
 MOVE_SAD_TIMEOUT = 5
+MOVE_CHECK_TABLE_TIMEOUT = 5
+MOVE_SHOWING_TIMEOUT = 5
 
 
 class GestureNode(rclpy.node.Node):
@@ -35,7 +37,7 @@ class GestureNode(rclpy.node.Node):
         try:
             ok = self._execute_gesture(msg.name)
         except TimeoutError:
-            self.get_logger().error(f'The {msg.name} gesture has timed out.')
+            self.get_logger().error(f'The {msg.name} gesture has timed out. Actual position is {str(self._movement_commands.current_head_pose)}')
             ok = False
 
         self._done_pub.publish(Done(id=msg.id, ok=ok))
@@ -60,6 +62,10 @@ class GestureNode(rclpy.node.Node):
             self._movement_commands.move_head_to_thinking(timeout=MOVE_THINKING_TIMEOUT)
         elif name == 'sad':
             self._movement_commands.move_head_to_sad(timeout=MOVE_SAD_TIMEOUT)
+        elif name == 'check_table':
+            self._movement_commands.move_head_to_check_table(timeout=MOVE_CHECK_TABLE_TIMEOUT)
+        elif name == "showing":
+            self._movement_commands.move_head_to_showing(timeout=MOVE_SHOWING_TIMEOUT)
         else:
             self.get_logger().error(f'Invalid gesture name ({name})')
             return False

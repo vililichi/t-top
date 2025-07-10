@@ -453,7 +453,8 @@ ManualChatStrategy::ManualChatStrategy(
           {{"talk/filter_state", FilterConfiguration::onOff(FilterConfiguration::DefaultState::DISABLED)},
            {"speech_to_text/filter_state", FilterConfiguration::onOff(FilterConfiguration::DefaultState::DISABLED)},
            {"vad/filter_state", FilterConfiguration::onOff(FilterConfiguration::DefaultState::DISABLED)},
-           {"led_animations/filter_state", FilterConfiguration::onOff(FilterConfiguration::DefaultState::DISABLED)}},
+           {"led_animations/filter_state", FilterConfiguration::onOff(FilterConfiguration::DefaultState::DISABLED)},
+           {"gesture/filter_state", FilterConfiguration::onOff(FilterConfiguration::DefaultState::DISABLED)}},
           std::move(filterPool)),
       m_desireSet(std::move(desireSet)),
       m_node(std::move(node)),
@@ -506,7 +507,7 @@ void ManualChatStrategy::onEnabling(const ManualChatDesire& desire)
 {
     // Unused parameter for now
     (void)desire;
-
+    enableFilter("gesture/filter_state");
     evaluateListenNeed();
 }
 

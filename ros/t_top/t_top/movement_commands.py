@@ -385,3 +385,16 @@ class MovementCommands:
 
     def move_torso_to_origin(self, should_wait=True, timeout=float('inf')):
         self.move_torso(0, should_wait, timeout=timeout)
+
+    def move_head_to_showing(self, speed_rad_sec=0.5, speed_meters_sec=0.1, timeout=float('inf')):
+        self.move_head([0.03, 0, HEAD_ZERO_Z, 0, 0, 0], should_wait=True, speed_rad_sec=speed_rad_sec, speed_meters_sec=speed_meters_sec, timeout=timeout)
+
+    def move_head_to_check_table(self, speed_rad_sec=0.5, speed_meters_sec=0.1, timeout=float('inf')):
+        
+        if not self.move_head([0.01, 0, HEAD_ZERO_Z, 0, 0.25, 0], should_wait=True, speed_rad_sec=speed_rad_sec, speed_meters_sec=speed_meters_sec, timeout=timeout):
+            return False
+        
+        if not self.move_head([0.015, 0, HEAD_ZERO_Z, 0, 0.35, 0], should_wait=True, speed_rad_sec=speed_rad_sec, speed_meters_sec=speed_meters_sec, timeout=timeout):
+            return False
+        
+        return True
