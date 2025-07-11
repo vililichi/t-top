@@ -68,19 +68,17 @@ class DisplayNode(Node):
         qos_policy = rclpy.qos.QoSProfile(reliability=rclpy.qos.ReliabilityPolicy.BEST_EFFORT,
                                                 history=rclpy.qos.HistoryPolicy.KEEP_LAST,
                                                 depth=1)
-        
+                
         self.widget = ScaledImage()
+        self.widget.setStyleSheet("background-color: black;")
         self.widget.showFullScreen()
         
         self.img_lock = Lock()
         self.cv_bridge = CvBridge()
         self.cv_image = None
 
-        self.pub = self.create_publisher(Image, 'interactive_yolo/image_rect', qos_profile=qos_policy)
-        self.pub_compressed = self.create_publisher(CompressedImage, 'interactive_yolo/image_rect/compressed', qos_profile=qos_policy)
-
-        self.ttop_camera_raw_subscriber = self.create_subscription( Image, 'interactive_yolo/display_input', self.input_raw_cb, qos_profile=qos_policy)
-        self.ttop_camera_raw_subscriber = self.create_subscription( CompressedImage, 'interactive_yolo/display_input_compressed', self.input_compressed_cb, qos_profile=qos_policy)
+        self.ttop_camera_raw_subscriber = self.create_subscription( Image, 'ttop_remote_proxy/display_input', self.input_raw_cb, qos_profile=qos_policy)
+        self.ttop_camera_compressed_subscriber = self.create_subscription( CompressedImage, 'ttop_remote_proxy/display_input/compressed', self.input_compressed_cb, qos_profile=qos_policy)
 
         self.thread = Thread(target=self.rect_camera_loop, daemon=True)
         self.thread.start()
