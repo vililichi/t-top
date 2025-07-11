@@ -12,6 +12,7 @@ import rclpy
 import rclpy.node
 
 from perception_msgs.msg import Transcript
+from std_msgs.msg import Bool
 
 from audio_utils import get_format_information, convert_audio_data_to_numpy_frames
 from audio_utils_msgs.msg import AudioFrame, VoiceActivity
@@ -46,6 +47,7 @@ class WhisperSpeechToTextNode(rclpy.node.Node):
         self._voice_sequence_queue = queue.Queue()
 
         self._text_pub = self.create_publisher(Transcript, 'transcript', 10)
+        self._processing_pub = self.create_publisher(Bool, 'processing_audio', 1)
         self._voice_activity_pub = self.create_subscription(VoiceActivity, 'voice_activity', self._voice_activity_cb, 10)
         self._audio_sub = hbba_lite.OnOffHbbaSubscriber(self, AudioFrame, 'audio_in', self._audio_cb, 10)
         self._audio_sub.on_filter_state_changed(self._filter_state_changed_cb)
@@ -100,6 +102,10 @@ class WhisperSpeechToTextNode(rclpy.node.Node):
             elif voice_sequence.shape[0] < self._minimum_voice_sequence_size:
                 # Residual audio is flushed.
                 continue
+            
+            start_processing_msg = Bool()
+            start_processing_msg.data = True
+            self._processing_pub.publish(start_processing_msg)
 
             start_timestamp = datetime.datetime.now()
             segments, _ = self._model.transcribe(voice_sequence,
@@ -112,6 +118,10 @@ class WhisperSpeechToTextNode(rclpy.node.Node):
             msg.processing_time_s = (end_timestamp - start_timestamp).total_seconds()
             msg.total_samples_count = voice_sequence.shape[0]
             self._text_pub.publish(msg)
+
+            start_processing_msg = Bool()
+            start_processing_msg.data = False
+            self._processing_pub.publish(start_processing_msg)
 
     def _warm_up_model(self):
         audio = np.zeros(SUPPORTED_SAMPLING_FREQUENCY, dtype=np.float32)

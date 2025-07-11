@@ -459,7 +459,8 @@ ManualChatStrategy::ManualChatStrategy(
       m_desireSet(std::move(desireSet)),
       m_node(std::move(node)),
       m_need_listen(false),
-      m_is_speaking(false)
+      m_is_speaking(false),
+      m_audio_processing(false)
 {
 
     // SPEAK
@@ -478,15 +479,20 @@ ManualChatStrategy::ManualChatStrategy(
     m_tts_text_output_Publisher = m_node->create_publisher<behavior_msgs::msg::Text>("talk/text", rclcpp::QoS(1).transient_local());
 
     // LISTEN
-    m_start_listen_Subscriber = m_node->create_subscription<behavior_msgs::msg::Done>(
+    m_start_listen_Subscriber = m_node->create_subscription<std_msgs::msg::Bool>(
         "listen/start",
         1,
-        [this](const behavior_msgs::msg::Done::SharedPtr msg) { startListenSubscriberCallback(msg); }
+        [this](const std_msgs::msg::Bool::SharedPtr msg) { startListenSubscriberCallback(msg); }
     );
     m_stt_transcript_input_Subscriber = m_node->create_subscription<perception_msgs::msg::Transcript>(
         "speech_to_text/transcript",
         1,
         [this](const perception_msgs::msg::Transcript::SharedPtr msg) { transcriptSubscriberCallback(msg); }
+    );
+    m_stt_processing_audio_Subscriber = m_node->create_subscription<std_msgs::msg::Bool>(
+        "speech_to_text/processing_audio",
+        1,
+        [this](const std_msgs::msg::Bool::SharedPtr msg) { processingAudioCallback(msg); }
     );
     m_stt_transcript_output_Publisher = m_node->create_publisher<perception_msgs::msg::Transcript>("listen/transcript", rclcpp::QoS(1).transient_local());
     m_is_listening_Publisher = m_node->create_publisher<std_msgs::msg::Bool>("listen/activated", rclcpp::QoS(1).transient_local());
@@ -538,13 +544,16 @@ void ManualChatStrategy::talkDoneSubscriberCallback(const behavior_msgs::msg::Do
     }
 }
 
-void ManualChatStrategy::startListenSubscriberCallback(const behavior_msgs::msg::Done::SharedPtr msg)
+void ManualChatStrategy::startListenSubscriberCallback(const std_msgs::msg::Bool::SharedPtr msg)
 {
-    if (msg->ok)
-    {
-        m_need_listen = true;
-        evaluateListenNeed();
-    }
+    m_need_listen = msg->data;
+    evaluateListenNeed();
+}
+
+void ManualChatStrategy::processingAudioCallback(const std_msgs::msg::Bool::SharedPtr msg)
+{
+    m_audio_processing = msg->data;
+    evaluateListenNeed();
 }
 
 void ManualChatStrategy::evaluateListenNeed()
@@ -593,7 +602,8 @@ void ManualChatStrategy::sendListeningLedAnimation()
     msg.duration_s = std::numeric_limits<double>::infinity();
     msg.name = "rotating_sin";
     msg.speed = 1.0;
-    msg.colors = vector<daemon_ros_client::msg::LedColor>{ManualChatStrategy::getColor(0, 255, 0)};
+    if(m_audio_processing) msg.colors = vector<daemon_ros_client::msg::LedColor>{ManualChatStrategy::getColor(255, 255, 0)};
+    else msg.colors = vector<daemon_ros_client::msg::LedColor>{ManualChatStrategy::getColor(0, 255, 0)};
     m_ledAnimationPublisher->publish(msg);
 }
 

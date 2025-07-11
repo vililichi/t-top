@@ -4,7 +4,7 @@
   <name>remote_proxy_components</name>
   <version>0.0.0</version>
   <description>The remote_proxy_components package</description>
-  <maintainer email="marc-antoine.maheux@usherbrooke.ca">Marc-Antoine Maheux</maintainer>
+  <maintainer email="gagk2605@usherbrooke.ca">Keven Gagnon</maintainer>
   <license>GPL-3.0 license </license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>

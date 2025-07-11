@@ -31,9 +31,17 @@ class STTPoxyNode(Node):
             1
         )
 
+
+        self._talk_input_sub = self.create_subscription(
+            Bool,
+            "ttop_remote_proxy/start_stt",
+            self._on_start_stt_cb,
+            1
+        )
+
         # publisher
         self._text_pub = self.create_publisher(String, "ttop_remote_proxy/stt", 1)
-
+        self._start_listen_pub = self.create_publisher(Bool, "listen/start", 1)
         self._is_listening_pub = self.create_publisher(Bool, "ttop_remote_proxy/is_listening", 1)
 
     def _on_transcript_received_cb(self, msg: Transcript):
@@ -49,6 +57,10 @@ class STTPoxyNode(Node):
     def _is_listening_cb(self, msg: Bool):
         self.get_logger().info(f"Is listening: {msg.data}")
         self._is_listening_pub.publish(msg)
+
+    def _on_start_stt_cb(self, msg: Bool):
+        self.get_logger().info(f"Starting to listen: {msg.data}")
+        self._start_listen_pub.publish(msg)
 
 def main(args=None):
     rclpy.init()
