@@ -44,7 +44,7 @@
     <!-- Talk -->
     <include file="$(find-pkg-share t_top)/launch/behaviors/talk.launch.xml">
         <arg name="language" value="fr"/>
-        <arg name="gender" value="male"/>
+        <arg name="gender" value="female"/>
         <arg name="voice_generator_type" value="piper"/>
         <arg name="speaking_rate" value="1.0"/>
         <arg name="talk_behavior_delay" value="0.0"/>
