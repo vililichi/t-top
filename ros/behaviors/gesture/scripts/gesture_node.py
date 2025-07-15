@@ -58,7 +58,7 @@ class GestureNode(rclpy.node.Node):
         elif name == 'origin_head':
             self._movement_commands.move_head_to_origin(should_wait=True, timeout=MOVE_HEAD_TO_ORIGIN_TIMEOUT)
         elif name == 'slow_origin_head':
-            self._movement_commands.move_head_to_origin(should_wait=True, speed_rad_sec=0.5, timeout=MOVE_HEAD_TO_ORIGIN_TIMEOUT)
+            self._movement_commands.move_head_to_origin(should_wait=True, speed_rad_sec=0.5, speed_meters_sec=0.1, timeout=MOVE_HEAD_TO_ORIGIN_TIMEOUT)
         elif name == 'origin_torso':
             self._movement_commands.move_torso_to_origin(should_wait=True, timeout=MOVE_TORSO_TO_ORIGIN_TIMEOUT)
         elif name == 'thinking':
