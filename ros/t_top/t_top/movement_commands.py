@@ -372,11 +372,11 @@ class MovementCommands:
             return False
         return True
 
-    def move_head_to_thinking(self, speed_rad_sec=0.5, timeout=float('inf')):
-        self.move_head([0, 0, HEAD_ZERO_Z, 0.25, 0, 0], should_wait=True, speed_rad_sec=speed_rad_sec, timeout=timeout)
+    def move_head_to_thinking(self, speed_rad_sec=0.5, speed_meters_sec=0.1, timeout=float('inf')):
+        self.move_head([0, 0, HEAD_ZERO_Z, 0.25, 0, 0], should_wait=True, speed_rad_sec=speed_rad_sec, speed_meters_sec=speed_meters_sec, timeout=timeout)
 
-    def move_head_to_sad(self, speed_rad_sec=0.5, timeout=float('inf')):
-        self.move_head([0, 0, HEAD_ZERO_Z, 0, 0.25, 0], should_wait=True, speed_rad_sec=speed_rad_sec, timeout=timeout)
+    def move_head_to_sad(self, speed_rad_sec=0.5, speed_meters_sec=0.1, timeout=float('inf')):
+        self.move_head([0, 0, HEAD_ZERO_Z, 0, 0.25, 0], should_wait=True, speed_rad_sec=speed_rad_sec, speed_meters_sec=speed_meters_sec, timeout=timeout)
 
     def move_head_to_origin(self, should_wait=True, speed_meters_sec=1.0e10,
                             speed_rad_sec=1.0e10, timeout=float('inf')):
