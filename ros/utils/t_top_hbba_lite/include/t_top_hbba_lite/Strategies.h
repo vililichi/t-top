@@ -17,6 +17,7 @@
 #include <behavior_msgs/msg/sound_file.hpp>
 
 #include <perception_msgs/msg/transcript.hpp>
+#include <audio_utils_msgs/msg/voice_activity.hpp>
 
 #include <memory>
 
@@ -242,6 +243,8 @@ class ManualChatStrategy : public Strategy<ManualChatDesire>
     bool m_need_listen;
     bool m_is_speaking;
     bool m_audio_processing;
+    bool m_voice_detected;
+    uint8_t m_last_state_signature;
 
     // SPEAK
     rclcpp::Subscription<behavior_msgs::msg::Done>::SharedPtr m_talkDoneSubscriber;
@@ -249,11 +252,12 @@ class ManualChatStrategy : public Strategy<ManualChatDesire>
     rclcpp::Subscription<behavior_msgs::msg::Text>::SharedPtr m_tts_text_input_Subscriber;
     rclcpp::Publisher<behavior_msgs::msg::Text>::SharedPtr m_tts_text_output_Publisher;
 
-    // LISTENm_stt_processing_audio_Subscriber
+    // LISTEN
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr m_start_listen_Subscriber;
     rclcpp::Subscription<std_msgs::msg::Bool>::SharedPtr m_stt_processing_audio_Subscriber;
     rclcpp::Subscription<perception_msgs::msg::Transcript>::SharedPtr m_stt_transcript_input_Subscriber;
     rclcpp::Publisher<perception_msgs::msg::Transcript>::SharedPtr m_stt_transcript_output_Publisher;
+    rclcpp::Subscription<audio_utils_msgs::msg::VoiceActivity>::SharedPtr m_stt_vad_Subscriber;
     rclcpp::Publisher<std_msgs::msg::Bool>::SharedPtr m_is_listening_Publisher;
     
     // LEDS
@@ -286,6 +290,7 @@ protected:
 private:
     void textSubscriberCallback(const behavior_msgs::msg::Text::SharedPtr msg);
     void transcriptSubscriberCallback(const perception_msgs::msg::Transcript::SharedPtr msg);
+    void vadSubscriberCallback(const audio_utils_msgs::msg::VoiceActivity::SharedPtr msg);
     void talkDoneSubscriberCallback(const behavior_msgs::msg::Done::SharedPtr msg);
     void startListenSubscriberCallback(const std_msgs::msg::Bool::SharedPtr msg);
     void processingAudioCallback(const std_msgs::msg::Bool::SharedPtr msg);

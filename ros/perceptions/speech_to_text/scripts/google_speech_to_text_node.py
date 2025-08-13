@@ -97,18 +97,19 @@ class GoogleSpeechToTextNode(rclpy.node.Node):
         speech_to_text_thread.join()
 
     def _speech_to_text_thread_run(self):
+        config = speech.RecognitionConfig(
+                encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
+                sample_rate_hertz=self._sampling_frequency,
+                language_code=self._language_code,
+                model="latest_short")
+        streaming_config = speech.StreamingRecognitionConfig(config=config,
+                                                                 single_utterance=False,
+                                                                 interim_results=True)
+        
         while rclpy.ok():
             if not self._is_enabled:
                 time.sleep(self._sleeping_duration)
                 continue
-
-            config = speech.RecognitionConfig(
-                encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-                sample_rate_hertz=self._sampling_frequency,
-                language_code=self._language_code)
-            streaming_config = speech.StreamingRecognitionConfig(config=config,
-                                                                 single_utterance=False,
-                                                                 interim_results=True)
 
             requests = self._request_frame_generator()
             start_timestamp = datetime.datetime.now()

@@ -25,6 +25,7 @@ find_package(perception_msgs REQUIRED)
 # Python Nodes
 install(PROGRAMS
   scripts/google_speech_to_text_node.py
+  scripts/vad_google_speech_to_text_node.py
   scripts/whisper_speech_to_text_node.py
   DESTINATION lib/${PROJECT_NAME}
 )

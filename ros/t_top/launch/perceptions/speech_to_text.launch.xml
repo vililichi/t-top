@@ -1,12 +1,23 @@
 <launch>
     <arg name="language"/> <!-- Options: fr or en -->
-    <arg name="type"/> <!-- Options: google or whisper -->
+    <arg name="type"/> <!-- Options: google, vad_google or whisper -->
     <arg name="whisper_model"/> <!-- Options: tiny, base, small, medium -->
     <arg name="speech_to_text_perception_delay" default="0"/>
     <let if="$(eval '\'$(var language)\' == \'en\'')" name="whisper_model_size" value="$(var whisper_model).en"/>
     <let if="$(eval '\'$(var language)\' == \'fr\'')" name="whisper_model_size" value="$(var whisper_model)"/>
 
     <node if="$(eval '\'$(var type)\' == \'google\'')" pkg="speech_to_text" exec="google_speech_to_text_node.py" name="google_speech_to_text_node" launch-prefix="bash -c 'sleep $(var speech_to_text_perception_delay); $0 $@' ">
+        <param name="sampling_frequency" value="16000"/>
+        <param name="frame_sample_count" value="1024"/>
+        <param name="request_frame_count" value="4"/>
+        <param name="language" value="$(var language)"/>
+
+        <remap from="audio_in" to="audio_input_signed_16_16000"/>
+        <remap from="audio_in/filter_state" to="speech_to_text/filter_state"/>
+        <remap from="transcript" to="speech_to_text/transcript"/>
+    </node>
+
+    <node if="$(eval '\'$(var type)\' == \'vad_google\'')" pkg="speech_to_text" exec="vad_google_speech_to_text_node.py" name="vad_google_speech_to_text_node" launch-prefix="bash -c 'sleep $(var speech_to_text_perception_delay); $0 $@' ">
         <param name="sampling_frequency" value="16000"/>
         <param name="frame_sample_count" value="1024"/>
         <param name="request_frame_count" value="4"/>

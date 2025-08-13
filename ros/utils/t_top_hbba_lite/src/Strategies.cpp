@@ -460,7 +460,9 @@ ManualChatStrategy::ManualChatStrategy(
       m_node(std::move(node)),
       m_need_listen(false),
       m_is_speaking(false),
-      m_audio_processing(false)
+      m_audio_processing(false),
+      m_voice_detected(false),
+      m_last_state_signature(255)
 {
 
     // SPEAK
@@ -488,6 +490,11 @@ ManualChatStrategy::ManualChatStrategy(
         "speech_to_text/transcript",
         1,
         [this](const perception_msgs::msg::Transcript::SharedPtr msg) { transcriptSubscriberCallback(msg); }
+    );
+    m_stt_vad_Subscriber = m_node->create_subscription<audio_utils_msgs::msg::VoiceActivity>(
+        "voice_activity",
+        1,
+        [this](const audio_utils_msgs::msg::VoiceActivity::SharedPtr msg) { vadSubscriberCallback(msg); }
     );
     m_stt_processing_audio_Subscriber = m_node->create_subscription<std_msgs::msg::Bool>(
         "speech_to_text/processing_audio",
@@ -556,14 +563,56 @@ void ManualChatStrategy::processingAudioCallback(const std_msgs::msg::Bool::Shar
     evaluateListenNeed();
 }
 
+void ManualChatStrategy::vadSubscriberCallback(const audio_utils_msgs::msg::VoiceActivity::SharedPtr msg)
+{
+    if(m_voice_detected != msg->is_voice)
+    {
+        m_voice_detected = msg->is_voice;
+        evaluateListenNeed();
+    }
+}
+
 void ManualChatStrategy::evaluateListenNeed()
 {
+    uint8_t state_signature = 0;
+
+    if(m_voice_detected)
+    {
+        state_signature += 1;
+        RCLCPP_INFO(m_node->get_logger(),"Voice Detected");
+    }
+
+    if(m_need_listen)
+    {
+        state_signature += 2;
+        RCLCPP_INFO(m_node->get_logger(),"Need Listen");
+    }
+
+    if(m_is_speaking)
+    {
+        state_signature += 4;
+        RCLCPP_INFO(m_node->get_logger(),"Is Speaking");
+    }
+
+    if(m_audio_processing)
+    {
+        state_signature += 8;
+        RCLCPP_INFO(m_node->get_logger(),"Audio Processing");
+    }
+
+    if(m_last_state_signature == state_signature) return;
+    m_last_state_signature = state_signature;
+
+    
+
     if( m_need_listen && !m_is_speaking )
     {
+        RCLCPP_INFO(m_node->get_logger(),"Activate Listen");
         activateListen();
     }
     else
     {
+        RCLCPP_INFO(m_node->get_logger(),"Deactivate Listen");
         deactivateListen();
     }
 }
@@ -602,7 +651,9 @@ void ManualChatStrategy::sendListeningLedAnimation()
     msg.duration_s = std::numeric_limits<double>::infinity();
     msg.name = "rotating_sin";
     msg.speed = 1.0;
+    
     if(m_audio_processing) msg.colors = vector<daemon_ros_client::msg::LedColor>{ManualChatStrategy::getColor(255, 255, 0)};
+    else  if (m_voice_detected) msg.colors = vector<daemon_ros_client::msg::LedColor>{ManualChatStrategy::getColor(0, 0, 255)};
     else msg.colors = vector<daemon_ros_client::msg::LedColor>{ManualChatStrategy::getColor(0, 255, 0)};
     m_ledAnimationPublisher->publish(msg);
 }
