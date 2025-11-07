@@ -32,6 +32,7 @@ install(PROGRAMS
   scripts/gesture_proxy_node.py
   scripts/tts_proxy_node.py
   scripts/stt_proxy_node.py
+  scripts/image_request_proxy_node.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

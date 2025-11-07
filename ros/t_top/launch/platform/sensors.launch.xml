@@ -3,6 +3,7 @@
     <arg name="camera_2d_wide_process_enabled" default="true"/>
     <arg name="camera_3d_enabled" default="true"/>
     <arg name="use_echo_cancellation" default="false"/>
+    <arg name="camera_2d_wide_rate" default="5.0"/>
     <arg name="pulse_audio_source"/>
     <arg name="pulse_audio_sink"/>
     <arg name="echo_cancellation_dest"/>
@@ -27,7 +28,7 @@
     <group if="$(var camera_2d_wide_enabled)">
 
         <node pkg="cv_camera" exec="cv_camera_node" name="camera_2d_wide_node" respawn="true">
-            <param name="rate" value="5.0"/>
+            <param name="rate" value="$(var camera_2d_wide_rate)"/>
             <param name="device_path" value="/dev/camera_2d_wide"/>
             <param name="image_width" value="1920"/>
             <param name="image_height" value="1080"/>

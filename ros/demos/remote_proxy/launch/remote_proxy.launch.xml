@@ -6,6 +6,7 @@
         <arg name="camera_2d_wide_process_enabled" value="false"/>
         <arg name="camera_3d_enabled" value="false"/>
         <arg name="use_echo_cancellation" value="false"/>
+        <arg name="camera_2d_wide_rate" value="2.0"/>
     </include>
 
      <!-- Ego Noise Reduction -->
@@ -58,6 +59,9 @@
     <node pkg="remote_proxy_components" exec="tts_proxy_node.py" name="tts_proxy_node"></node>
     <node pkg="remote_proxy_components" exec="stt_proxy_node.py" name="stt_proxy_node"></node>
     <node pkg="remote_proxy_components" exec="gesture_proxy_node.py" name="gesture_proxy_node"></node>
+    <node pkg="remote_proxy_components" exec="image_request_proxy_node.py" name="image_request_proxy_node">
+        <remap from="ttop_remote_proxy/image_request_proxy_input/compressed" to="/camera_2d_wide_full_hd/image/compressed"/>
+    </node>
 
     <!-- Motivation / HBBA -->
     <node pkg="remote_proxy" exec="remote_proxy_node" name="remote_proxy_node" output="screen">
